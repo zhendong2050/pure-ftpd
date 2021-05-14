@@ -35,7 +35,7 @@ static void antiidle(void)
 
 static void randomdelay(void)
 {
-    usleep(rand() % 15000UL);
+    //usleep(rand() % 15000UL);
 }
 
 /*
@@ -87,6 +87,7 @@ int sfgets(void)
 #endif
     while (scanned < cmdsize) {
         if (scanned >= readnbd) {      /* nothing left in the buffer */
+            /*
             pfd.revents = 0;
             while ((pollret = poll(&pfd, 1U, idletime * 1000UL)) < 0 &&
                    errno == EINTR);
@@ -103,6 +104,7 @@ int sfgets(void)
             if (readnbd >= cmdsize) {
                 break;
             }
+            */
 #ifdef WITH_TLS
             if (tls_cnx != NULL) {
                 while ((readnb = SSL_read

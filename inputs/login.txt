@@ -1,0 +1,3 @@
+USER fuzzing
+PASS fuzzing
+dele a/a.txt

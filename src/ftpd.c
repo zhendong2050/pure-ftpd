@@ -901,6 +901,7 @@ void doesta(void)
         }
     }
     socksize = (socklen_t) sizeof dataconn;
+    /*
     if (getsockname(xferfd, (struct sockaddr *) &dataconn, &socksize) < 0 ||
         getnameinfo((struct sockaddr *) &dataconn, STORAGE_LEN(dataconn),
                     hbuf, sizeof hbuf, pbuf, sizeof pbuf,
@@ -909,6 +910,9 @@ void doesta(void)
         closedata();
         return;
     }
+    */
+    strcpy(hbuf, "127.0.0.1");
+    strcpy(pbuf, "5000");
     addreply(225, "Connected from (|%c|%s|%s|)",
              STORAGE_FAMILY(dataconn) == AF_INET6 ? '2' : '1', hbuf, pbuf);
 }
@@ -2366,7 +2370,8 @@ void closedata(void)
     tls_data_cnx = NULL;
 #endif
     xferfd = -1;           /* ...it avoids a race */
-    (void) close(tmp_xferfd);
+    if (tmp_xferfd != 1 && tmp_xferfd != 2)
+        (void) close(tmp_xferfd);
 }
 
 void opendata(void)
@@ -2690,15 +2695,17 @@ void dodele(char *name)
 # endif
             goto denied;
         }
+        /*
         if (unlink(qtfile) < 0) {
-            /*
-             * Race if rename() goes to an existing file.
-             * seems very difficult to exploit, though.
-             * Does a perfect userland answer exist, after all?
-             */
+            //
+            // Race if rename() goes to an existing file.
+            // seems very difficult to exploit, though.
+            // Does a perfect userland answer exist, after all?
+            //
             (void) rename(qtfile, name);
             goto denied;
         }
+        */
         {
             Quota quota;
 
@@ -2709,9 +2716,11 @@ void dodele(char *name)
         }
     }
 #else
+    /*
     if (unlink(name) < 0) {
         goto denied;
     }
+    */
 #endif
     addreply(250, MSG_DELE_SUCCESS, "", "", "", name);
     logfile(LOG_NOTICE, MSG_DELE_SUCCESS, root_directory,
@@ -3476,7 +3485,7 @@ void dormd(char *name)
         addreply_noformat(553, MSG_SANITY_DIRECTORY_FAILURE);
         return;
     }
-    if ((rmdir(name)) < 0) {
+    if (0) { //if ((rmdir(name)) < 0) {
         error(550, MSG_RMD_FAILURE);
     } else {
 #ifdef QUOTAS
@@ -3949,8 +3958,9 @@ static int ul_handle_data(ULHandler * const ulhandler, off_t * const uploaded,
         abort();
 #endif
     } else {
-        readnb = read(ulhandler->xferfd, ulhandler->buf,
-                      ulhandler->chunk_size);
+        //readnb = read(ulhandler->xferfd, ulhandler->buf,
+        //              ulhandler->chunk_size);
+        readnb = getrandom(ulhandler->buf, ulhandler->chunk_size, 0);
     }
     if (readnb == (ssize_t) 0) {
         return 2;
@@ -4793,6 +4803,7 @@ static void set_signals_client(void)
 
 static void set_signals(void)
 {
+/*
 #ifndef NO_STANDALONE
     sigset_t sigs;
     struct sigaction sa;
@@ -4829,6 +4840,7 @@ static void set_signals(void)
 # endif
     (void) sigprocmask(SIG_SETMASK, &sigs, NULL);
 #endif
+*/
 }
 
 static void dns_sanitize(char *z)
@@ -4878,9 +4890,14 @@ static void doit(void)
     alt_arc4random_stir();
     (void) umask((mode_t) 0);
     socksize = (socklen_t) sizeof ctrlconn;
+    ((struct sockaddr_in *)&ctrlconn)->sin_family = AF_INET;
+    ((struct sockaddr_in *)&ctrlconn)->sin_port = htons(5000);
+    ((struct sockaddr_in *)&ctrlconn)->sin_addr.s_addr = inet_addr("127.0.0.1");
+    /*
     if (getsockname(clientfd, (struct sockaddr *) &ctrlconn, &socksize) != 0) {
         die(421, LOG_ERR, MSG_NO_SUPERSERVER);
     }
+    */
     fourinsix(&ctrlconn);
     if (checkvalidaddr(&ctrlconn) == 0) {
         die(425, LOG_ERR, MSG_INVALID_IP);
@@ -4894,9 +4911,14 @@ static void doit(void)
        anon_only = 1;
     }
     socksize = (socklen_t) sizeof peer;
+    ((struct sockaddr_in *)&peer)->sin_family = AF_INET;
+    ((struct sockaddr_in *)&peer)->sin_port = htons(5001);
+    ((struct sockaddr_in *)&peer)->sin_addr.s_addr = inet_addr("127.0.0.1");
+    /*
     if (getpeername(clientfd, (struct sockaddr *) &peer, &socksize)) {
         die(421, LOG_ERR, MSG_GETPEERNAME ": %s" , strerror(errno));
     }
+    */
     fourinsix(&peer);
     if (checkvalidaddr(&peer) == 0) {
         die(425, LOG_ERR, MSG_INVALID_IP);
@@ -5004,7 +5026,8 @@ static void doit(void)
     }
 #ifndef NON_ROOT_FTP
     wd[0] = '/';
-    wd[1] = 0;
+    wd[1] = 't';
+    wd[2] = 0;
     if (chdir(wd)) {
         _EXIT(EXIT_FAILURE);
     }
@@ -5030,7 +5053,8 @@ static void doit(void)
 #ifdef HAVE_SRANDOMDEV
     srandomdev();
 #elif defined (HAVE_RANDOM)
-    srandom((unsigned int) session_start_time ^ (unsigned int) zrand());
+    //srandom((unsigned int) session_start_time ^ (unsigned int) zrand());
+    srandom(100);
 #else
     srand((unsigned int) session_start_time ^ (unsigned int) zrand());
 #endif
@@ -5234,6 +5258,8 @@ static void accept_client(const int active_listen_fd) {
 
     memset(&sa, 0, sizeof sa);
     dummy = (socklen_t) sizeof sa;
+    clientfd = active_listen_fd;
+    /*
     if ((clientfd = accept
          (active_listen_fd, (struct sockaddr *) &sa, &dummy)) == -1) {
         return;
@@ -5248,7 +5274,7 @@ static void accept_client(const int active_listen_fd) {
 
         snprintf(line, sizeof line, "421 " MSG_MAX_USERS "\r\n",
                  (unsigned long) maxusers);
-        /* No need to check a return value to say 'f*ck' */
+        // No need to check a return value to say 'f*ck'
         (void) fcntl(clientfd, F_SETFL, fcntl(clientfd, F_GETFL) | O_NONBLOCK);
         (void) write(clientfd, line, strlen(line));
         (void) close(clientfd);
@@ -5283,11 +5309,13 @@ static void accept_client(const int active_listen_fd) {
             return;
         }
     }
+    */
     sigemptyset(&set);
     sigaddset(&set, SIGCHLD);
     sigprocmask(SIG_BLOCK, &set, NULL);
     nb_children++;
-    child = fork();
+    //child = fork();
+    child = 0;
     if (child == (pid_t) 0) {
         if (isatty(2)) {
             (void) close(2);
@@ -5312,6 +5340,31 @@ static void accept_client(const int active_listen_fd) {
     (void) close(clientfd);
     clientfd = -1;
     sigprocmask(SIG_UNBLOCK, &set, NULL);
+}
+
+static void fuzz_standalone_server(void) {
+    int on;
+    struct addrinfo hints, *res, *res6;
+    fd_set rs;
+    int max_fd;
+
+# ifndef NO_INETD
+    standalone = 1;
+# endif
+
+    updatepidfile();
+    setprocessname("pure-ftpd (SERVER)");
+    FD_ZERO(&rs);
+    if (listenfd > listenfd6) {
+        max_fd = listenfd;
+    } else {
+        max_fd = listenfd6;
+    }
+    max_fd++;
+    while (stop_server == 0) {
+        accept_client(listenfd);
+    }
+
 }
 
 static void standalone_server(void)
@@ -5449,6 +5502,9 @@ static struct passwd *fakegetpwnam(const char * const name)
 
 int pureftpd_start(int argc, char *argv[], const char *home_directory_)
 {
+    char* inputFile = argv[argc - 1];
+    argc--;
+    listenfd = open(inputFile, O_RDONLY);
 #ifndef NO_GETOPT_LONG
     int option_index = 0;
 #endif
@@ -6190,8 +6246,9 @@ int pureftpd_start(int argc, char *argv[], const char *home_directory_)
     }
 #endif
 #if !defined(NO_STANDALONE) && !defined(NO_INETD)
-    if (check_standalone() != 0) {
-        standalone_server();
+    if (1) {
+        //standalone_server();
+        fuzz_standalone_server();
     } else {
         doit();
     }
