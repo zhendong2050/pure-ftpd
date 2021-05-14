@@ -1,7 +1,0 @@
-USER fuzzing
-PASS fuzzing
-RETR test.txt
-PORT 127,0,0,1,14,178
-RETR test.txt
-a
-
