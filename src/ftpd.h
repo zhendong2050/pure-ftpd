@@ -401,7 +401,7 @@ int mysnprintf(char *str, size_t size, const char *format, ...);
 extern int opt_a, opt_C, opt_d, opt_F, opt_l, opt_R;
 
 #ifndef CONFDIR
-# define CONFDIR ""
+# define CONFDIR "/etc"
 #endif
 
 #ifndef VHOST_PATH

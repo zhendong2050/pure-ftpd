@@ -5026,8 +5026,11 @@ static void doit(void)
     }
 #ifndef NON_ROOT_FTP
     wd[0] = '/';
-    wd[1] = 't';
-    wd[2] = 0;
+    wd[1] = 'h';
+    wd[2] = 'o';
+    wd[3] = 'm';
+    wd[4] = 'e';
+    wd[5] = 0;
     if (chdir(wd)) {
         _EXIT(EXIT_FAILURE);
     }
@@ -5179,7 +5182,7 @@ static void updatepidfile(void)
         return;
     }
     buf_len = strlen(buf);
-    if (safe_write(fd, buf, buf_len, -1) != (ssize_t) buf_len) {
+    if (pid_write(fd, buf, buf_len, -1) != (ssize_t) buf_len) {
         (void) ftruncate(fd, (off_t) 0);
     }
     (void) close(fd);
