@@ -47,6 +47,23 @@
 # include <dmalloc.h>
 #endif
 
+static inline int fuzz_poll(struct pollfd *fds, nfds_t nfds, int timeout) {
+    int ret = 0;
+    int num = random();
+    if (num > (RAND_MAX / 10)) {
+        fds[0].revents++;
+        ret++;
+    }
+    num = random();
+    if(nfds > 1) {
+        if (num < (RAND_MAX / 5)) {
+            fds[1].revents++;
+            ret++;
+        }
+    }
+    return ret;
+}
+
 void disablesignals(void)
 {
     sigset_t sigs;
@@ -2405,7 +2422,7 @@ void opendata(void)
         alarm(idletime);
         for (;;) {
             pfds[0].revents = pfds[1].revents = 0;
-            pollret = poll(pfds, sizeof pfds / sizeof pfds[0], idletime * 1000UL);
+            pollret = fuzz_poll(pfds, sizeof pfds / sizeof pfds[0], idletime * 1000UL);
             if (pollret <= 0) {
                 die(421, LOG_INFO, MSG_TIMEOUT_DATA, (unsigned long) idletime);
             }
@@ -2418,6 +2435,7 @@ void opendata(void)
             }
             socksize = (socklen_t) sizeof(dataconn);
             memset(&dataconn, 0, sizeof dataconn);
+            /*
             if ((fd = accept(datafd, (struct sockaddr *) &dataconn,
                              &socksize)) == -1) {
                 nope:
@@ -2426,10 +2444,15 @@ void opendata(void)
                 error(421, MSG_ACCEPT_FAILED);
                 return;
             }
+            */
+            fd = datafd;
             if (STORAGE_FAMILY(dataconn) != AF_INET
                 && STORAGE_FAMILY(dataconn) != AF_INET6) {
                 (void) close(fd);
-                goto nope;
+                (void) close(datafd);
+                datafd = -1;
+                error(421, MSG_ACCEPT_FAILED);
+                return;
             }
             fourinsix(&dataconn);
             if (addrcmp(&peer, &dataconn) == 0) {
