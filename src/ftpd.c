@@ -66,19 +66,23 @@ static inline int fuzz_poll(struct pollfd *fds, nfds_t nfds, int timeout) {
 
 void disablesignals(void)
 {
+    /*
     sigset_t sigs;
 
     sigfillset(&sigs);
     if (sigprocmask(SIG_BLOCK, &sigs, &old_sigmask) < 0) {
         _EXIT(EXIT_FAILURE);
     }
+    */
 }
 
 static void enablesignals(void)
 {
+    /*
     if (sigprocmask(SIG_SETMASK, &old_sigmask, NULL) < 0) {
         _EXIT(EXIT_FAILURE);
     }
+    */
 }
 
 void usleep2(const unsigned long microsec)
