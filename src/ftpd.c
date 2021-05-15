@@ -2280,6 +2280,7 @@ static int doport3(const int protocol)
         } else {
             STORAGE_PORT(dataconn) = htons(*portlistpnt);
         }
+        break;
         /*
         if (bind(datafd, (struct sockaddr *) &dataconn,
                  STORAGE_LEN(dataconn)) == 0) {
