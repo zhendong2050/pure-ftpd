@@ -47,22 +47,6 @@
 # include <dmalloc.h>
 #endif
 
-static inline int fuzz_poll(struct pollfd *fds, nfds_t nfds, int timeout) {
-    int ret = 0;
-    int num = random();
-    if (num > (RAND_MAX / 10)) {
-        fds[0].revents++;
-        ret++;
-    }
-    num = random();
-    if(nfds > 1) {
-        if (num < (RAND_MAX / 5)) {
-            fds[1].revents++;
-            ret++;
-        }
-    }
-    return ret;
-}
 
 void disablesignals(void)
 {
@@ -890,7 +874,7 @@ static void do_ipv6_port(char *p, char delim)
     }
     if (*p != delim || atoi(p + 1) == 0) {
         nope:
-        (void) close(datafd);
+        //(void) close(datafd);
         datafd = -1;
         addreply_noformat(501, MSG_SYNTAX_ERROR_IP);
         return;
@@ -2140,7 +2124,7 @@ void dopasv(int psvtype)
         return;
     }
     if (datafd != -1) {                /* for buggy clients */
-        (void) close(datafd);
+        //(void) close(datafd);
         datafd = -1;
     }
     fourinsix(&ctrlconn);
@@ -2150,7 +2134,7 @@ void dopasv(int psvtype)
     }
     firstporttried = firstport + zrand() % (lastport - firstport + 1);
     p = firstporttried;
-    datafd = socket(STORAGE_FAMILY(ctrlconn), SOCK_STREAM, IPPROTO_TCP);
+    datafd = STDERR_FILENO; // socket(STORAGE_FAMILY(ctrlconn), SOCK_STREAM, IPPROTO_TCP);
     if (datafd == -1) {
         error(425, MSG_CANT_PASSIVE);
         return;
@@ -2168,34 +2152,38 @@ void dopasv(int psvtype)
         } else {
             STORAGE_PORT(dataconn) = htons(p);
         }
+        /*
         if (bind(datafd, (struct sockaddr *) &dataconn,
                  STORAGE_LEN(dataconn)) == 0) {
             break;
         }
+        */
         p--;
         if (p < firstport) {
             p = lastport;
         }
         if (p == firstporttried) {
-            (void) close(datafd);
+            //(void) close(datafd);
             datafd = -1;
             addreply_noformat(425, MSG_PORTS_BUSY);
             return;
         }
     }
-    alarm(idletime);
+    //alarm(idletime);
+    /*
     if (listen(datafd, DEFAULT_BACKLOG_DATA) < 0) {
-        (void) close(datafd);
+        //(void) close(datafd);
         datafd = -1;
         error(425, MSG_GETSOCKNAME_DATA);
         return;
     }
+    */
     switch (psvtype) {
     case 0:
         if (STORAGE_FAMILY(force_passive_ip) == 0) {
             a = ntohl(STORAGE_SIN_ADDR_CONST(dataconn));
         } else if (STORAGE_FAMILY(force_passive_ip) == AF_INET6) {
-            (void) close(datafd);
+            //(void) close(datafd);
             datafd = -1;
             addreply_noformat(425, MSG_NO_EPSV);
             return;
@@ -2263,7 +2251,7 @@ static int doport3(const int protocol)
     disablesignals();
     seteuid((uid_t) 0);
 # endif
-    if ((datafd = socket(protocol, SOCK_STREAM, IPPROTO_TCP)) == -1) {
+    if ((datafd = STDERR_FILENO) == -1) { // socket(protocol, SOCK_STREAM, IPPROTO_TCP)) == -1) {
         data_socket_error:
 # ifndef NON_ROOT_FTP
         if (seteuid(authresult.uid) != 0) {
@@ -2271,7 +2259,7 @@ static int doport3(const int protocol)
         }
         enablesignals();
 # endif
-        (void) close(datafd);
+        //(void) close(datafd);
         datafd = -1;
         error(425, MSG_CANT_CREATE_DATA_SOCKET);
 
@@ -2292,10 +2280,12 @@ static int doport3(const int protocol)
         } else {
             STORAGE_PORT(dataconn) = htons(*portlistpnt);
         }
+        /*
         if (bind(datafd, (struct sockaddr *) &dataconn,
                  STORAGE_LEN(dataconn)) == 0) {
             break;
         }
+        */
 # ifdef USE_ONLY_FIXED_DATA_PORT
         (void) sleep(1U);
 # else
@@ -2342,7 +2332,7 @@ void doport2(struct sockaddr_storage a, unsigned int p)
         return;
     }
     if (datafd != -1) {    /* for buggy clients saying PORT over and over */
-        (void) close(datafd);
+        //(void) close(datafd);
         datafd = -1;
     }
     if (p < 1024U) {
@@ -2367,7 +2357,7 @@ void doport2(struct sockaddr_storage a, unsigned int p)
         }
         if (allowfxp == 0 || (allowfxp == 1 && guest != 0)) {
             hu:
-            (void) close(datafd);
+            //(void) close(datafd);
             datafd = -1;
             addreply(500, MSG_NO_FXP, hbuf, peerbuf);
             return;
@@ -2423,13 +2413,16 @@ void opendata(void)
         pfd->events = POLLIN | POLLERR | POLLHUP;
         pfd->revents = 0;
 
-        alarm(idletime);
+        //alarm(idletime);
         for (;;) {
             pfds[0].revents = pfds[1].revents = 0;
-            pollret = fuzz_poll(pfds, sizeof pfds / sizeof pfds[0], idletime * 1000UL);
+            /*
+            pollret = poll(pfds, sizeof pfds / sizeof pfds[0], idletime * 1000UL);
             if (pollret <= 0) {
                 die(421, LOG_INFO, MSG_TIMEOUT_DATA, (unsigned long) idletime);
             }
+            */
+            pfds[1].revents++;
             if ((pfds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) != 0 ||
                 (pfds[1].revents & (POLLERR | POLLHUP | POLLNVAL)) != 0) {
                 die(221, LOG_INFO, MSG_LOGOUT);
@@ -2453,7 +2446,7 @@ void opendata(void)
             if (STORAGE_FAMILY(dataconn) != AF_INET
                 && STORAGE_FAMILY(dataconn) != AF_INET6) {
                 (void) close(fd);
-                (void) close(datafd);
+                //(void) close(datafd);
                 datafd = -1;
                 error(421, MSG_ACCEPT_FAILED);
                 return;
@@ -2481,6 +2474,7 @@ void opendata(void)
             STORAGE_PORT(peer2) = htons(peerdataport);
         }
         again:
+        /*
         if (connect(datafd, (struct sockaddr *) &peer2,
                     STORAGE_LEN(peer2)) != 0) {
             if ((errno == EAGAIN || errno == EINTR
@@ -2494,10 +2488,11 @@ void opendata(void)
             }
             addreply(425, MSG_CNX_PORT_FAILED ": %s",
                      peerdataport, strerror(errno));
-            (void) close(datafd);
+            //(void) close(datafd);
             datafd = -1;
             return;
         }
+        */
         fd = datafd;
         datafd = -1;
         addreply(150, MSG_CNX_PORT, peerdataport);
@@ -2514,7 +2509,7 @@ void opendata(void)
 #endif
     }
     xferfd = fd;
-    alarm(MAX_SESSION_XFER_IDLE);
+    //alarm(MAX_SESSION_XFER_IDLE);
 }
 
 #ifndef MINIMAL
@@ -4016,6 +4011,7 @@ static int ul_handle_data(ULHandler * const ulhandler, off_t * const uploaded,
         if (required_sleep > 0.0) {
             repoll:
             ulhandler->pfds_command.revents = 0;
+            /*
             pollret = poll(&ulhandler->pfds_command, 1, required_sleep * 1000.0);
             if (pollret == 0) {
                 return 0;
@@ -4026,6 +4022,8 @@ static int ul_handle_data(ULHandler * const ulhandler, off_t * const uploaded,
                 }
                 return -1;
             }
+            */
+            ulhandler->pfds_command.revents++;
             if ((ulhandler->pfds_command.revents &
                  (POLLERR | POLLHUP | POLLNVAL)) != 0) {
                 return -1;
@@ -4062,6 +4060,7 @@ static int ul_send(ULHandler * const ulhandler)
         }
         ulhandler->pfds[PFD_DATA].revents =
             ulhandler->pfds[PFD_COMMANDS].revents = 0;
+        /*
         pollret = poll(ulhandler->pfds,
                        sizeof ulhandler->pfds / sizeof ulhandler->pfds[0],
                        timeout);
@@ -4072,6 +4071,13 @@ static int ul_send(ULHandler * const ulhandler)
         if (pollret == 0) {
             addreply_noformat(421, MSG_TIMEOUT);
             return -1;
+        }
+        */
+
+        if (random() % 2) {
+            ulhandler->pfds[PFD_DATA].revents++;
+        } else {
+            ulhandler->pfds[PFD_COMMANDS].revents++;
         }
         if ((ulhandler->pfds[PFD_DATA].revents & POLLIN) != 0) {
             ret = ul_handle_data(ulhandler, &uploaded, ts_start);
@@ -4251,7 +4257,7 @@ void dostor(char *name, const int append, const int autorename)
         addreply_noformat(550, MSG_NOT_REGULAR_FILE);
         goto end;
     }
-    alarm(MAX_SESSION_XFER_IDLE);
+    //alarm(MAX_SESSION_XFER_IDLE);
 
     /* Anonymous users *CAN* overwrite 0-bytes files - This is the right behavior */
     if (st.st_size > (off_t) 0) {
