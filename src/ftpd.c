@@ -84,7 +84,7 @@ static void enablesignals(void)
 void usleep2(const unsigned long microsec)
 {
     disablesignals();
-    usleep(microsec);
+    //usleep(microsec);
     enablesignals();
 }
 
