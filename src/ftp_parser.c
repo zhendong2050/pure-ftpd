@@ -250,7 +250,7 @@ void parser(void)
 #endif
         }
         doreply();
-        alarm(idletime * 2);
+        //alarm(idletime * 2);
         switch (sfgets()) {
         case -1:
 #ifdef BORING_MODE
