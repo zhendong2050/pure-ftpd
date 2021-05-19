@@ -941,6 +941,7 @@ void doestp(void)
         }
     }
     socksize = (socklen_t) sizeof dataconn;
+    /*
     if (getpeername(xferfd, (struct sockaddr *) &dataconn, &socksize) < 0 ||
         getnameinfo((struct sockaddr *) &dataconn, STORAGE_LEN(dataconn),
                     hbuf, sizeof hbuf, pbuf, sizeof pbuf,
@@ -949,6 +950,9 @@ void doestp(void)
         closedata();
         return;
     }
+    */
+    strcpy(hbuf, "localhost");
+    strcpy(pbuf, "5001");
     addreply(225, "Connected to (|%c|%s|%s|)",
              STORAGE_FAMILY(dataconn) == AF_INET6 ? '2' : '1', hbuf, pbuf);
 }
@@ -1374,6 +1378,7 @@ void douser(const char *username)
 # endif
 #endif
 #ifdef WITH_VIRTUAL_HOSTS
+        /*
         if (getnameinfo((struct sockaddr *) &ctrlconn, STORAGE_LEN(ctrlconn),
                         hbuf, sizeof hbuf, NULL,
                         (size_t) 0U, NI_NUMERICHOST) != 0
@@ -1381,6 +1386,8 @@ void douser(const char *username)
                        sizeof name)) {
             _EXIT(EXIT_FAILURE);
         }
+        */
+        strcpy(hbuf, "localhost");
         if (chdir(name) != 0)         /* non-virtual */
 #endif
         {
@@ -4958,6 +4965,7 @@ static void doit(void)
         die(425, LOG_ERR, MSG_INVALID_IP);
     }
 #ifndef DONT_LOG_IP
+    /*
     for (;;) {
         int eai;
 
@@ -4975,6 +4983,8 @@ static void doit(void)
         }
         die(425, LOG_ERR, MSG_INVALID_IP);
     }
+    */
+    strcpy(host, "localhost");
 #endif
 #ifndef DONT_LOG_IP
     dns_sanitize(host);
