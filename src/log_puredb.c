@@ -239,6 +239,7 @@ static int pw_puredb_parseline(char *line, const char * const pwd,
             /* pass */
         } else
 #endif
+        /*
         {
             ret = - ((crypted = (const char *) crypt(pwd, line)) == NULL ||
                      pure_strcmp(line, crypted) != 0);
@@ -246,6 +247,7 @@ static int pw_puredb_parseline(char *line, const char * const pwd,
                 return -1;
             }
         }
+        */
     }
     if ((line = my_strtok2(NULL, *PW_LINE_SEP)) == NULL || *line == 0) {   /* uid */
         return -1;
