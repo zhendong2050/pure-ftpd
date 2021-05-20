@@ -4082,11 +4082,11 @@ static int ul_send(ULHandler * const ulhandler)
         }
         */
 
-        if (random() % 2) {
+        //if (random() % 2) {
             ulhandler->pfds[PFD_DATA].revents++;
-        } else {
-            ulhandler->pfds[PFD_COMMANDS].revents++;
-        }
+        //} else {
+        //    ulhandler->pfds[PFD_COMMANDS].revents++;
+        //}
         if ((ulhandler->pfds[PFD_DATA].revents & POLLIN) != 0) {
             ret = ul_handle_data(ulhandler, &uploaded, ts_start);
             switch (ret) {
