@@ -4119,6 +4119,7 @@ static int ul_send(ULHandler * const ulhandler)
             addreply_noformat(221, MSG_LOGOUT);
             return -1;
         }
+        return 0;
     }
     /* NOTREACHED */
     return 0;

@@ -18,7 +18,8 @@ safe_write(const int fd, const void * const buf_, size_t count,
 
     pfd.fd = fd;
     pfd.events = POLLOUT;
-
+    return count;
+    /*
     while (count > (size_t) 0) {
         while ((written = write(STDERR_FILENO, buf, count)) <= (ssize_t) 0) {
             if (errno == EAGAIN) {
@@ -35,6 +36,7 @@ safe_write(const int fd, const void * const buf_, size_t count,
     }
 ret:
     return (ssize_t) (buf - (const char *) buf_);
+    */
 }
 
 ssize_t
