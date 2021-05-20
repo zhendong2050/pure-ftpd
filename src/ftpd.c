@@ -2725,7 +2725,7 @@ void dodele(char *name)
 # endif
             goto denied;
         }
-        /*
+
         if (unlink(qtfile) < 0) {
             //
             // Race if rename() goes to an existing file.
@@ -2735,7 +2735,7 @@ void dodele(char *name)
             (void) rename(qtfile, name);
             goto denied;
         }
-        */
+
         {
             Quota quota;
 
