@@ -1575,8 +1575,8 @@ static AuthResult pw_check(const char *account, const char *password,
 #endif
 
 #ifdef NON_ROOT_FTP
-            result.uid = geteuid();
-            result.gid = getegid();
+            //result.uid = geteuid();
+            //result.gid = getegid();
 #endif
 
             return result;
