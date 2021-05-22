@@ -116,7 +116,7 @@ int quota_update(Quota *quota,
         ftruncate(fd, (off_t) 0) == 0) {
 
         buf_len = strlen(buf);
-        if (safe_write(fd, buf, buf_len, -1) != (ssize_t) buf_len) {
+        if (pid_write(fd, buf, buf_len, -1) != (ssize_t) buf_len) {
             (void) ftruncate(fd, (off_t) 0);
             goto bye;
         }
