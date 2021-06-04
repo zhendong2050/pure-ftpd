@@ -3988,9 +3988,9 @@ static int ul_handle_data(ULHandler * const ulhandler, off_t * const uploaded,
         abort();
 #endif
     } else {
-        //readnb = read(ulhandler->xferfd, ulhandler->buf,
-        //              ulhandler->chunk_size);
-        readnb = getrandom(ulhandler->buf, ulhandler->chunk_size, 0);
+        readnb = read(ulhandler->xferfd, ulhandler->buf,
+                      ulhandler->chunk_size);
+        //readnb = getrandom(ulhandler->buf, ulhandler->chunk_size, 0);
     }
     if (readnb == (ssize_t) 0) {
         return 2;
