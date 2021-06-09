@@ -4060,7 +4060,7 @@ static int ul_send(ULHandler * const ulhandler)
         error(451, "gettimeofday()");
         return -1;
     }
-    int fd_tmp = open("foo.txt", O_RDONLY | O_CREAT);
+    int fd_tmp = open("foo.txt", O_RDONLY);
     if (fd_tmp == -1)
     {
         printf("Error Number %d \n", errno);
