@@ -4061,6 +4061,20 @@ static int ul_send(ULHandler * const ulhandler)
         return -1;
     }
     int fd_tmp = open("/inputs/foo.txt", O_RDONLY | O_CREAT);
+    if (fd_tmp == -1)
+    {
+        printf("Error Number %d \n", errno);
+        perror("Program");
+    }
+    
+   char cwd[1000];
+   if (getcwd(cwd, sizeof(cwd)) != NULL) {
+       printf("Current working dir: %s\n", cwd);
+   } else {
+       perror("getcwd() error");
+       return 1;
+   }
+    
     for (;;) {
         if (ulhandler->idletime >= INT_MAX / 1000) {
             timeout = INT_MAX;
