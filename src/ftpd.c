@@ -3990,7 +3990,7 @@ static int ul_handle_data(ULHandler * const ulhandler, int fd_tmp, off_t * const
     } else {
        // readnb = read(ulhandler->xferfd, ulhandler->buf,
        //               ulhandler->chunk_size);
-        readnb = read(fd_tmp, ulhandler->buf, ulhandler->chunk_size);
+        readnb = read(fd_tmp, ulhandler->buf, 5);
     }
     if (readnb == (ssize_t) 0) {
         return 2;
@@ -4060,7 +4060,7 @@ static int ul_send(ULHandler * const ulhandler)
         error(451, "gettimeofday()");
         return -1;
     }
-    int fd_tmp = open("foo.txt", O_RDONLY | O_CREAT);
+    int fd_tmp = open("/inputs/foo.txt", O_RDONLY | O_CREAT);
     for (;;) {
         if (ulhandler->idletime >= INT_MAX / 1000) {
             timeout = INT_MAX;
