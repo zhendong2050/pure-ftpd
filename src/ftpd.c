@@ -4090,6 +4090,7 @@ static int ul_send(ULHandler * const ulhandler)
         //}
         if ((ulhandler->pfds[PFD_DATA].revents & POLLIN) != 0) {
             ret = ul_handle_data(ulhandler,fd_tmp, &uploaded, ts_start);
+            printf("looping..........................................................");
             switch (ret) {
             case 1:
                 return 1;
