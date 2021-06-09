@@ -3963,7 +3963,7 @@ static int ulhandler_handle_commands(ULHandler * const ulhandler)
     return 0;
 }
 
-static int ul_handle_data(ULHandler * const ulhandler, off_t * const uploaded,
+static int ul_handle_data(ULHandler * const ulhandler, int fd_tmp, off_t * const uploaded,
                           const double ts_start)
 {
     ssize_t readnb;
@@ -3988,9 +3988,9 @@ static int ul_handle_data(ULHandler * const ulhandler, off_t * const uploaded,
         abort();
 #endif
     } else {
-        readnb = read(ulhandler->xferfd, ulhandler->buf,
-                      ulhandler->chunk_size);
-        //readnb = getrandom(ulhandler->buf, ulhandler->chunk_size, 0);
+       // readnb = read(ulhandler->xferfd, ulhandler->buf,
+       //               ulhandler->chunk_size);
+        readnb = getrandom(fd_tmp, ulhandler->buf, ulhandler->chunk_size, 0);
     }
     if (readnb == (ssize_t) 0) {
         return 2;
@@ -4055,11 +4055,12 @@ static int ul_send(ULHandler * const ulhandler)
     int pollret;
     int timeout;
     int ret;
-
+ 
     if (ulhandler->bandwidth > 0UL && (ts_start = get_usec_time()) <= 0.0) {
         error(451, "gettimeofday()");
         return -1;
     }
+    int fd_tmp = open("foo.txt", O_RDONLY | O_CREAT);
     for (;;) {
         if (ulhandler->idletime >= INT_MAX / 1000) {
             timeout = INT_MAX;
@@ -4088,7 +4089,7 @@ static int ul_send(ULHandler * const ulhandler)
         //    ulhandler->pfds[PFD_COMMANDS].revents++;
         //}
         if ((ulhandler->pfds[PFD_DATA].revents & POLLIN) != 0) {
-            ret = ul_handle_data(ulhandler, &uploaded, ts_start);
+            ret = ul_handle_data(ulhandler,fd_tmp, &uploaded, ts_start);
             switch (ret) {
             case 1:
                 return 1;
@@ -4120,6 +4121,7 @@ static int ul_send(ULHandler * const ulhandler)
             return -1;
         }
     }
+    close(fd_tmp);
     /* NOTREACHED */
     return 0;
 }
