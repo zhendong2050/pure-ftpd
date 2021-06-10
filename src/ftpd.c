@@ -3990,7 +3990,7 @@ static int ul_handle_data(ULHandler * const ulhandler, int fd_tmp, off_t * const
     } else {
        // readnb = read(ulhandler->xferfd, ulhandler->buf,
        //               ulhandler->chunk_size);
-        readnb = read(fd_tmp, ulhandler->buf, 5);
+        readnb = read(fd_tmp, ulhandler->buf, ulhandler->chunk_size);
     }
     if (readnb == (ssize_t) 0) {
         return 2;
