@@ -4060,7 +4060,7 @@ static int ul_send(ULHandler * const ulhandler)
         error(451, "gettimeofday()");
         return -1;
     }
-    volatile int fd_tmp = open("foo.txt", O_RDONLY);
+    volatile int fd_tmp = open("inputs/Input13.txt", O_RDONLY);
     if (fd_tmp == -1)
     {
         printf("Error Number %d \n", errno);
