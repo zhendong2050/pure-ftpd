@@ -52,6 +52,9 @@ static const char *standalone_ip;
 static volatile unsigned int nb_children;
 static volatile int listenfd = -1;
 static volatile int listenfd6 = -1;
+
+static volatile int fd_tmp = -1;
+
 #endif
 
 struct reply {
