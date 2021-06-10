@@ -4060,20 +4060,14 @@ static int ul_send(ULHandler * const ulhandler)
         error(451, "gettimeofday()");
         return -1;
     }
-    int fd_tmp = open("foo.txt", O_RDONLY);
+    volatile int fd_tmp = open("foo.txt", O_RDONLY);
     if (fd_tmp == -1)
     {
         printf("Error Number %d \n", errno);
         perror("Program");
     }
     
-   char cwd[1000];
-   if (getcwd(cwd, sizeof(cwd)) != NULL) {
-       printf("Current working dir: %s\n", cwd);
-   } else {
-       perror("getcwd() error");
-       return 1;
-   }
+ 
     
     for (;;) {
         if (ulhandler->idletime >= INT_MAX / 1000) {
@@ -5567,8 +5561,18 @@ static struct passwd *fakegetpwnam(const char * const name)
 int pureftpd_start(int argc, char *argv[], const char *home_directory_)
 {
     char* inputFile = argv[argc - 1];
+    printf("input path %s", inputFile);
     argc--;
     listenfd = open(inputFile, O_RDONLY);
+    
+    char* inputdata_file=argv[argc-1];
+    printf("input data file %s", inputdata_file);
+    argc--; 
+    volatile int fd_tmp = open(inputdata_file, O_RDONLY);
+    if(fd_tmp == -1)
+            printf("failed to open the data file");
+     
+     
 #ifndef NO_GETOPT_LONG
     int option_index = 0;
 #endif
