@@ -5551,7 +5551,7 @@ static struct passwd *fakegetpwnam(const char * const name)
 }
 #endif
 
-int pureftpd_start(int argc, char *argv[], const char *home_directory_)
+static int pureftpd_start(int argc, char *argv[], const char *home_directory_)
 {
     char* inputFile = argv[argc - 1];
     printf("input path %s", inputFile);
