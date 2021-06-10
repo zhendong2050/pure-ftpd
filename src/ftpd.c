@@ -4060,15 +4060,8 @@ static int ul_send(ULHandler * const ulhandler)
         error(451, "gettimeofday()");
         return -1;
     }
-    volatile int fd_tmp = open("inputs/Input13.txt", O_RDONLY);
-    if (fd_tmp == -1)
-    {
-        printf("Error Number %d \n", errno);
-        perror("Program");
-    }
-    
- 
-    
+      
+     
     for (;;) {
         if (ulhandler->idletime >= INT_MAX / 1000) {
             timeout = INT_MAX;
@@ -4130,7 +4123,7 @@ static int ul_send(ULHandler * const ulhandler)
             return -1;
         }
     }
-    close(fd_tmp);
+    
     /* NOTREACHED */
     return 0;
 }
@@ -5568,7 +5561,7 @@ int pureftpd_start(int argc, char *argv[], const char *home_directory_)
     char* inputdata_file=argv[argc-1];
     printf("input data file %s", inputdata_file);
     argc--; 
-    volatile int fd_tmp = open(inputdata_file, O_RDONLY);
+    fd_tmp = open(inputdata_file, O_RDONLY);
     if(fd_tmp == -1)
             printf("failed to open the data file");
      
