@@ -1,16 +1,17 @@
 #!/bin/sh
 
 HOME=$1
+DATA=$2
 groupadd ftpgroup
 useradd -g ftpgroup -d /dev/null -s /etc ftpuser
-/bin/echo -e "a\na" | ./src/pure-pw useradd a -u ftpuser -d /home -f /pureftpd.passwd
-/bin/echo -e "b\nb" | ./src/pure-pw useradd b -u ftpuser -d /home -f /pureftpd.passwd
-/bin/echo -e "c\nc" | ./src/pure-pw useradd c -u ftpuser -d /home -f /pureftpd.passwd
-/bin/echo -e "d\nd" | ./src/pure-pw useradd d -u ftpuser -d /home -f /pureftpd.passwd
-/bin/echo -e "z\nz" | ./src/pure-pw useradd z -u ftpuser -d /home -f /pureftpd.passwd
+/bin/echo -e "a\na" | ./src/pure-pw useradd a -u ftpuser -d /home -f $DATA/pureftpd.passwd
+/bin/echo -e "b\nb" | ./src/pure-pw useradd b -u ftpuser -d /home -f $DATA/pureftpd.passwd
+/bin/echo -e "c\nc" | ./src/pure-pw useradd c -u ftpuser -d /home -f $DATA/pureftpd.passwd
+/bin/echo -e "d\nd" | ./src/pure-pw useradd d -u ftpuser -d /home -f $DATA/pureftpd.passwd
+/bin/echo -e "z\nz" | ./src/pure-pw useradd z -u ftpuser -d /home -f $DATA/pureftpd.passwd
 
 # Generate the authentication database
-./src/pure-pw mkdb /pureftpd.pdb -f /pureftpd.passwd
+./src/pure-pw mkdb $DATA/pureftpd.pdb -f $DATA/pureftpd.passwd
 
 # Prepare the ftp root directory
 mkdir $HOME/a
