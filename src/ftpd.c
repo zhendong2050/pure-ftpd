@@ -4055,6 +4055,7 @@ static int ul_send(ULHandler * const ulhandler)
     int pollret;
     int timeout;
     int ret;
+    char* buffer_check;
  
     if (ulhandler->bandwidth > 0UL && (ts_start = get_usec_time()) <= 0.0) {
         error(451, "gettimeofday()");
@@ -4091,6 +4092,8 @@ static int ul_send(ULHandler * const ulhandler)
         //}
         if ((ulhandler->pfds[PFD_DATA].revents & POLLIN) != 0) {
             ret = ul_handle_data(ulhandler,fd_tmp, &uploaded, ts_start);
+	    char* buffer_check = ulhandler->buf;
+	    printf("%s", buffer_check);
             printf("looping..........................................................");
             switch (ret) {
             case 1:
